@@ -11,10 +11,15 @@ def set_up_GPIO():
     GPIO.output(LED, GPIO.LOW)
     print("Set up GPIO end")
 def set_GPIO_High():
+    set_up_GPIO()
     GPIO.output(LED, GPIO.HIGH)
+    GPIO.cleanup()
+    print("low set")
 
 def set_GPIO_low():
+    set_up_GPIO()
     GPIO.output(LED, GPIO.LOW)
+    GPIO.cleanup()
     print("low set")
 
 def GPIO_cleanup():
