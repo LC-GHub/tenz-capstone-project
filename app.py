@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, uic, QtCore
 from tenz import *
 import sys
 import time
@@ -33,6 +33,29 @@ class Ui(QtWidgets.QDialog):
         mainDialog = Ui_main()
         mainDialog.exec_();
 
+class Worker(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+    progressChanged = QtCore.pyqtSignal(int)
+    shockAdministered = QtCore.pyqtSignal()
+
+    def __init__(self):
+        super(Worker, self).__init__()
+        self.shockCount = 0
+
+    def run(self):
+        for _ in range(10):
+            self.incrementProgressBar()
+            shock()
+            self.shockAdministered.emit()
+            self.progressChanged.emit(0)
+        self.finished.emit()
+
+    def incrementProgressBar(self):
+        for _ in range(5):
+            progress_value = (_ + 1) * 20
+            self.progressChanged.emit(progress_value)
+            time.sleep(1)
+
 class Ui_main(QtWidgets.QDialog):
     results = [resultObj() for i in range(10)]
     def __init__(self):
@@ -43,24 +66,30 @@ class Ui_main(QtWidgets.QDialog):
         self.feel_it_btn.clicked.connect(self.onBtnClick)
         self.back_btn.clicked.connect(self.onClickBackBtn)
         self.start_btn.clicked.connect(self.onClickStartBtn)
+        self.stop_btn.clicked.connect(self.onClickStopBtn)
+        self.worker = Worker()
+        self.workerThread = QtCore.QThread()
+        self.worker.moveToThread(self.workerThread)
+        self.worker.finished.connect(self.workerThread.quit)
+        self.worker.shockAdministered.connect(self.incrementShockCount)
+        self.worker.progressChanged.connect(self.updateProgressBar)
+        self.workerThread.started.connect(self.worker.run)
     def onClickBackBtn(self):
         self.close()
         startDialog = Ui()
         startDialog.exec_()
     def onClickStartBtn(self):
-        shock_thread = threading.Thread(target=self.administerShock)
-        shock_thread.start()
-    def administerShock(self):
-        for _ in range(3):
-            shock()
-            self.incrementShockCount()
-            print(self.shockCount)
-            time.sleep(5)
+        self.shockCount = 0
+        self.workerThread.start()    
     def onBtnClick(self):
         # TODO: save the result {feltShock: true, timing: <time>}
         Ui_main.results[self.shockCount-1].setShockToTrue()
         print(Ui_main.results[self.shockCount-1].feltShock)
         pass
+    def onClickStopBtn(self):
+        set_GPIO_low();
+        self.workerThread.quit()
+        self.close()
     def incrementShockCount(self):
         self.shockCount += 1
         self.shock_count.display(self.shockCount)
@@ -68,6 +97,9 @@ class Ui_main(QtWidgets.QDialog):
             #TODO: if shockcount more than 10, then show a result screen ??
             # print(list(Ui_main.results.feltShock))
             pass
+    def updateProgressBar(self, value):
+        # Update progress bar value based on the shock count
+        self.progressBar.setValue(value)
 
 
 app = QtWidgets.QApplication(sys.argv)
