@@ -23,7 +23,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="Close">
+  <widget class="QPushButton" name="btn_close">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -33,7 +33,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>PushButton</string>
+    <string>Close</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">

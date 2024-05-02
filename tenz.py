@@ -29,7 +29,7 @@ def shock():
     set_up_GPIO()
     print("shock start")
     GPIO.output(LED, GPIO.HIGH)
-    time.sleep(1)
+    time.sleep(.5)
     GPIO.output(LED, GPIO.LOW)
     print("shock ended")
     GPIO_cleanup()
