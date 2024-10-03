@@ -1,5 +1,6 @@
 import time
 import RPi.GPIO as GPIO
+import random
 
 # GPIO pin number of LED
 LED = 22
@@ -33,7 +34,20 @@ def shock():
     GPIO.output(LED, GPIO.LOW)
     print("shock ended")
     GPIO_cleanup()
+def shock_w_placebo(random):
+    set_up_GPIO()
+    print("shock start")
+    if (random > 3):
+        print("true shock")
+        GPIO.output(LED, GPIO.HIGH)
+        time.sleep(.5)
+        GPIO.output(LED, GPIO.LOW)
+    else:
+        print("false shock")
+        GPIO.output(LED, GPIO.HIGH)
+        time.sleep(0.0)
+        GPIO.output(LED, GPIO.LOW)
+    print("shock ended")
+    GPIO_cleanup()
 
-set_up_GPIO()
-GPIO.output(LED, GPIO.LOW)
-GPIO.cleanup()
+shock()
